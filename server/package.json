@@ -7,7 +7,8 @@
     "lib": "lib"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js"
   },
   "author": "",
   "license": "ISC",
@@ -15,11 +16,13 @@
     "body-parser": "^1.18.2",
     "cookie-parser": "^1.4.3",
     "cookie-session": "^2.0.0-beta.3",
+    "cors": "^2.8.4",
     "dotenv": "^5.0.0",
     "express": "^4.16.2",
     "express-flash-messages": "^0.1.1",
     "express-handlebars": "^3.0.0",
     "express-method-override-get-post-support": "^1.0.1",
+    "jsonwebtoken": "^8.1.1",
     "load-helpers": "^1.0.1",
     "lodash": "^4.17.5",
     "method-override": "^2.3.10",

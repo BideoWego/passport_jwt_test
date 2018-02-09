@@ -9,6 +9,13 @@ app.locals.appName = 'My App';
 
 
 // ----------------------------------------
+// CORS
+// ----------------------------------------
+const cors = require('cors');
+app.use(cors());
+
+
+// ----------------------------------------
 // ENV
 // ----------------------------------------
 if (process.env.NODE_ENV !== 'production') {
@@ -79,6 +86,37 @@ app.use(express.static(`${__dirname}/public`));
 
 
 // ----------------------------------------
+// Passport
+// ----------------------------------------
+const passport = require('passport');
+app.use(passport.initialize());
+
+
+// ----------------------------------------
+// JWTs
+// ----------------------------------------
+const JWT_SECRET = 'secret';
+const JWT_ISSUER = 'localhost:3000';
+const JWT_AUDIENCE = 'localhost:3001';
+
+const jwt = require('jsonwebtoken');
+const {
+  Strategy: JwtStrategy,
+  ExtractJwt
+} = require('passport-jwt');
+
+passport.use(new JwtStrategy({
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  secretOrKey: JWT_SECRET,
+  issuer: JWT_ISSUER,
+  audience: JWT_AUDIENCE
+}, function(payload, done) {
+  console.log(payload);
+  done(null, { username: 'foobar', id: 1 });
+}));
+
+
+// ----------------------------------------
 // Logging
 // ----------------------------------------
 const morgan = require('morgan');
@@ -91,9 +129,31 @@ app.use(morganToolkit());
 // Routes
 // ----------------------------------------
 app.get('/', (req, res) => {
-  req.flash('Hi!');
   res.render('welcome/index');
 });
+
+
+app.post('/login', (req, res) => {
+  if (req.body.username === 'foobar' && req.body.password === 'password') {
+    const payload = { id: 1 };
+    const token = jwt.sign(payload, JWT_SECRET, {
+      issuer: JWT_ISSUER,
+      audience: JWT_AUDIENCE
+    });
+    return res.json({ token });
+  }
+
+  res.status(401).json({ error: 'Unauthorized' });
+});
+
+
+app.get(
+  '/secret',
+  passport.authenticate('jwt', { session: false }),
+  (req, res) => {
+    res.send(req.user);
+  }
+);
 
 
 // ----------------------------------------
@@ -144,7 +204,8 @@ app.use((err, req, res, next) => {
   if (err.stack) {
     err = err.stack;
   }
-  res.status(500).render('errors/500', { error: err });
+  console.log(err);
+  res.status(500).json({ error: err });
 });
 
 
